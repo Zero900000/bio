@@ -1,68 +1,82 @@
 import random
 import math
 
-class Cell:
-    def __init__(self,parent_gene=None):
-        #gene that gets passed and mutated
-        if parent_gene:
-            self.gene = parent_gene
+class Speed:
+    def __init__(self, dominant: bool, value: float):
+        self.dominant = dominant
+        self.value = value
+
+    def express(self, organism):
+        organism.speed += self.value
+        # FIXED THE TRADE OFF SO IT ISN'T BROKEN
+        organism.energy_consumption += (self.value * 0.1)
+
+
+class Gene:
+    def __init__(self, allele_pair):
+        self.alleles = list(allele_pair)  # [Allele 1, Allele 2]? Is that what you were going for?
+
+        if self.alleles[1].dominant:
+            self.phen = self.alleles[1]
         else:
-            self.gene = {
-                'max_speed':2.0,
-                'size':10.0,
-                'sensing_range':50.0,
-                'reproduction_strategy':'asexual' #we can talk about how we want to do sexual later
+            self.phen = self.alleles[0]
 
-            }
-    
-        #phenotype? (is that what it's called?) traits
-        self.max_speed = self.gene['max_speed']
-        self.size = self.gene['size']
-        self.sensing_range = self.gene['sensing_range']
-        self.strategy = self.gene['reproduction_strategy']
 
-        #starting stats
-        self.energy = 100.0
+
+
+class Eukaryote:
+    def __init__(self, genome, energy, x=0, y=0): #added x and y for detection
+        self.genome = genome
+        self.energy = energy
+        self.x = x
+        self.y = y
         self.age = 0
+        
+        # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
+        for chromosome in self.genome:
+            for gene in chromosome:
+                gene.phen.express(self)
+        
+        if not hasattr(self, "photosynthetic"): self.photosynthetic = 0.0 #hasattr basically checks if an object jas a specific attribute or not
+        if not hasattr(self, "sensing_range"): self.sensing_range = 30.0 
+        if not hasattr(self, "speed"): self.speed = 1.0
+    @property
+    def energy_consumption(self):
+        base_cost = 0.2
+        # Running faster or having  eyes/sensors costs more energy
+        trait_costs = (self.speed ** 2 * 0.05) + (self.sensing_range * 0.002)
+        
+        photo_off = self.photosynthetic * 0.4 
+        
+        # Ensure energy consumption never drops below a tiny minimum cost to stay alive
+        return max(0.02, base_cost + trait_costs - photo_off)
 
-        #ADD WHATEVER YOU NEED FOR PYGAMES HERE!!!
+    def run(self):
+        self.age += 1
+        self.energy -= self.energy_consumption
 
+    def detect_closest(self,targets):
 
-    def update(self):
-        #call every frame or something idk
-        self.age +=1
-        #gotta nerf cells so bigger ones use wayyy more energy i think that's how it works in bio)
-        energy_cost = (self.size*0.05)+(self.max_speed**2*0.1) #these numbers work fine for now 
-        self.energy -= energy_cost
+        closest_target = None
+        closest_dis = self.sensing_ran
+
+        for target in targets:
+            if target == self:
+                continue
+        
+            dx = target.x -  self.x
+            dy = target.y - self.y
+            distance = math.hyplot(dx,dy)
+
+            if distance < closest_dis:
+                closest_dis = distance
+                closest_target = target
+        return closest_target
     
-    #mutation bit
-    def mutate(self,geneome):
-        mutated_gene = geneome.copy()
-        mutation_rate = 0.2 #20% chance of mutation it's really really visiable 
-        mutation_visibility = 0.2 #how much traits change or something i think
-
-        for trait in mutated_gene:
-            if trait == 'reproduction_strategy':
-                None #tell me what you want to happen here I think a continue block would be the best idea
-
-            if random.random() < mutation_rate:
-                change = random.uniform(-mutation_visibility,mutation_visibility)
-                mutated_gene[trait] += mutated_gene[trait] * change
-
-                #if traits become 0 or negative
-                if mutated_gene[trait] <0.1: #or do you want 0.01?
-                    mutated_gene[trait] = 0.1
-        return mutated_gene
-    
-    def reproduce_asexual(self):
-        self.energy /= 2
-        child_gene = self.mutate(self.gene)
-        child = Cell(parent_gene=child_gene)
-
-        #Put pygame stuff here ig?
-
-        return child
-
-    def reporduce_sexual(self, partner):
-        None
-        #How will we do the need for a partner im thinking if 2 cells are close enough they cause just make a child if enough energy (subtract 25 from each) and make a child out of that with crossing over
+    def reproduction(self,closest_target):
+        if isinstance(closest_target,Eukaryote) == True:
+            #reproduction
+            None
+        else:
+            #add some food class? Do you want me to do that
+            None
