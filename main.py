@@ -9,7 +9,7 @@ class Speed:
     def express(self, organism):
         organism.speed += self.value
         # FIXED THE TRADE OFF SO IT ISN'T BROKEN
-        organism.energy_consumption += (self.value * 0.1)
+        organism.energy_consumption_change += (self.value * 0.1)
 
 
 class Gene:
@@ -40,7 +40,7 @@ class Eukaryote:
         self.age = 0
 
         self.speed = 0.0
-        self.photosynthetic = False
+        self.is_photosynthetic = False
         self.energy_consumption_change  = 0.0
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
@@ -61,7 +61,7 @@ class Eukaryote:
         photo_off = self.photosynthetic
         
         # Ensure energy consumption never drops below a tiny minimum cost to stay alive
-        return max(0.02, base_cost + trait_costs - photo_off)
+        return max(0.02, base_cost + trait_costs)
 
     def run(self):
         self.age += 1
