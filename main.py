@@ -21,7 +21,14 @@ class Gene:
         else:
             self.phen = self.alleles[0]
 
-
+class photosynthetic:
+    def __init__(self,dominant: bool, value: bool):
+        self.dominant = dominant
+        self.value = value
+    def express(self,organism):
+        if self.value:
+            organism.is_photosynthetic = True
+            organism.speed *= 0.5
 
 
 class Eukaryote:
@@ -31,22 +38,27 @@ class Eukaryote:
         self.x = x
         self.y = y
         self.age = 0
-        
+
+        self.speed = 0.0
+        self.photosynthetic = False
+        self.energy_consumption_change  = 0.0
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
             for gene in chromosome:
                 gene.phen.express(self)
         
-        if not hasattr(self, "photosynthetic"): self.photosynthetic = 0.0 #hasattr basically checks if an object jas a specific attribute or not
-        if not hasattr(self, "sensing_range"): self.sensing_range = 30.0 
-        if not hasattr(self, "speed"): self.speed = 1.0
+#hasattr basically checks if an object jas a specific attribute or not
+        if not hasattr(self, "sensing_range"): self.sensing_range = 30.0
+        if self.speed <= 0.0:
+            self.speed = 1.0
+
     @property
     def energy_consumption(self):
         base_cost = 0.2
         # Running faster or having  eyes/sensors costs more energy
-        trait_costs = (self.speed ** 2 * 0.05) + (self.sensing_range * 0.002)
+        trait_costs = (self.speed ** 2 * 0.05) + (self.sensing_range * 0.002) + self.energy_consumption_change
         
-        photo_off = self.photosynthetic * 0.4 
+        photo_off = self.photosynthetic
         
         # Ensure energy consumption never drops below a tiny minimum cost to stay alive
         return max(0.02, base_cost + trait_costs - photo_off)
@@ -54,11 +66,13 @@ class Eukaryote:
     def run(self):
         self.age += 1
         self.energy -= self.energy_consumption
+        if self.is_photosynthetic:
+            self.energy += 0.5
 
     def detect_closest(self,targets):
 
         closest_target = None
-        closest_dis = self.sensing_ran
+        closest_dis = self.sensing_range
 
         for target in targets:
             if target == self:
@@ -66,7 +80,7 @@ class Eukaryote:
         
             dx = target.x -  self.x
             dy = target.y - self.y
-            distance = math.hyplot(dx,dy)
+            distance = math.hypot(dx,dy)
 
             if distance < closest_dis:
                 closest_dis = distance
