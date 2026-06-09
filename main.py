@@ -36,4 +36,7 @@ while var.game:
         if event.type == pygame.QUIT:
             var.game = False
     scr.screen.fill((255,255,255))
+    for eukaryote in euk.eukaryotes:
+        eukaryote.run()
+        eukaryote.display()
     pygame.display.update()

@@ -1,5 +1,6 @@
 import math
 import random
+import scr
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
 # digestion speed / efficiency (more speed = less efficiency), cold or warmblooded, photosynthetic, mutation resistance,
 # number of offspring, crossover rate
@@ -7,21 +8,30 @@ import random
 
 #alleles
 class Speed:
-    def __init__(self, dominant: bool, value: float):
+    def __init__(self, dominant: bool, value = None):
         self.dominant = dominant
         self.value = value
-
+        if value is None:
+            if self.dominant:
+                self.value = 4.0
+            else:
+                self.value = 2.0
     def express(self, organism):
         organism.speed += self.value
         # FIXED THE TRADE OFF SO IT ISN'T BROKEN
-        organism.energy_consumption_change += (self.value * 0.1)
+        organism.energy_consumption += (self.value * 0.1)
 
 class Photosynthetic:
-    def __init__(self, dominant: bool, value: float):
+    def __init__(self, dominant: bool, value = None):
         self.dominant = dominant
         self.value = value
-    def express(self,organism):
-        if self.value > 0:
+        if value is None:
+            if self.dominant:
+                self.value = 2.0
+            else:
+                self.value = 0.0
+    def express(self, organism):
+        if self.value > 0.0:
             organism.is_photosynthetic = True
             organism.speed /= self.value
             organism.energy_consumption_change += self.value
@@ -46,10 +56,11 @@ class Eukaryote:
         self.is_photosynthetic = False
         self.energy_consumption = 0.0
         self.crossover_rate = 0.2
+        self.color = (0,0,0)
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
             for gene in chromosome:
-                gene.phen.express(self)
+                chromosome[gene].phen.express(self)
 
 #hasattr basically checks if an object jas a specific attribute or not
         if not hasattr(self, "sensing_range"): self.sensing_range = 30.0
@@ -68,7 +79,8 @@ class Eukaryote:
     def run(self):
         self.age += 1
         self.energy -= self.energy_consumption
-
+    def display(self):
+        scr.rect((self.x, self.y), (self.energy, self.energy), self.color)
     def detect_closest(self,targets):
 
         closest_target = None
@@ -100,7 +112,8 @@ class Eukaryote:
                     place_holder = proper_genome[0][chromosome_number][gene_name]
                     proper_genome[0][chromosome_number][gene_name] = proper_genome[1][chromosome_number][gene_name]
                     proper_genome[1][chromosome_number][gene_name] = place_holder
-
+    def new(self):
+        return Eukaryote(self.genome, self.energy, (self.x, self.y))
     def reproduction(self,closest_target):
         if isinstance(closest_target,Eukaryote):
             #reproduction
@@ -108,6 +121,14 @@ class Eukaryote:
         else:
             #add some food class? Do you want me to do that
             pass
+rabbit = Eukaryote([{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 20, (0, 0))
+eukaryotes = [None] * 8
+for index in range(len(eukaryotes)):
+    eukaryotes[index] = rabbit.new()
+    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
+    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+
+
 # class Eukaryote:
 # 	def __init__(self, genome, energy):
 # 		self.genome = genome
