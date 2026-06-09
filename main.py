@@ -58,8 +58,6 @@ class Eukaryote:
         # Running faster or having  eyes/sensors costs more energy
         trait_costs = (self.speed ** 2 * 0.05) + (self.sensing_range * 0.002) + self.energy_consumption_change
         
-        photo_off = self.photosynthetic
-        
         # Ensure energy consumption never drops below a tiny minimum cost to stay alive
         return max(0.02, base_cost + trait_costs)
 
