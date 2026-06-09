@@ -5,4 +5,4 @@ screen_size = (300, 300)
 screen = pygame.display.set_mode(screen_size)
 
 def rect(pos: tuple, size: tuple, color: tuple):
-    pygame.draw.rect(screen, color, (size, pos))
+    pygame.draw.rect(screen, color, (pos, size))

@@ -6,6 +6,7 @@ import scr
 import var
 import numpy as np
 from numba import njit, prange
+clock = pygame.time.Clock()
 
 @njit(parallel=True,fastmath=True)
 def detect_closest(cell_pos,targt_pos,sensing_range):
@@ -32,6 +33,7 @@ def detect_closest(cell_pos,targt_pos,sensing_range):
     return closest_ind
 
 while var.game:
+    clock.tick(10)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             var.game = False
