@@ -18,7 +18,6 @@ class Speed:
                 self.value = 2.0
     def express(self, organism):
         organism.speed += self.value
-        # FIXED THE TRADE OFF SO IT ISN'T BROKEN
         organism.energy_consumption += (self.value * 0.1)
 
 class Photosynthetic:
@@ -57,10 +56,16 @@ class Eukaryote:
         self.energy_consumption = 0.0
         self.crossover_rate = 0.2
         self.color = (0,0,0)
+        self.sensing_range = 5
+        self.sexual_compatibility = 4.0
+        self.energy_cap = 10.0
+        self.offspring = 2
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
             for gene in chromosome:
                 chromosome[gene].phen.express(self)
+        if self.is_photosynthetic:
+            self.color = (0, 127, 0)
 
 #hasattr basically checks if an object jas a specific attribute or not
         if not hasattr(self, "sensing_range"): self.sensing_range = 30.0
@@ -80,55 +85,66 @@ class Eukaryote:
         self.age += 1
         self.energy -= self.energy_consumption
     def display(self):
-        scr.rect((self.x, self.y), (self.energy, self.energy), self.color)
-    def detect_closest(self,targets):
-
-        closest_target = None
-        closest_dis = self.sensing_range
-
-        for target in targets:
-            if target == self:
-                continue
-
-            dx = target.x - self.x
-            dy = target.y - self.y
-            distance = math.hypot(dx,dy)
-
-            if distance < closest_dis:
-                closest_dis = distance
-                closest_target = target
-        return closest_target
+        size = (self.energy, self.energy)
+        scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
+    # def detect_closest(self,targets):
+    #
+    #     closest_target = None
+    #     closest_dis = self.sensing_range
+    #
+    #     for target in targets:
+    #         if target == self:
+    #             continue
+    #
+    #         dx = target.x - self.x
+    #         dy = target.y - self.y
+    #         distance = math.hypot(dx,dy)
+    #
+    #         if distance < closest_dis:
+    #             closest_dis = distance
+    #             closest_target = target
+    #     return closest_target
 
     def meiosis(self):
         proper_genome = [[],[]]
-        for chromosome in self.genome:
-            for gene in chromosome:
-                proper_genome[0].append(gene.alleles[0])
-                proper_genome[1].append(gene.alleles[1])
-
+        for chromosome_number in range(len(self.genome)):
+            proper_genome[0].append({})
+            proper_genome[1].append({})
+            for gene in self.genome[chromosome_number]:
+                proper_genome[0][chromosome_number].update({gene: self.genome[chromosome_number][gene].alleles[0]})
+                proper_genome[1][chromosome_number].update({gene: self.genome[chromosome_number][gene].alleles[1]})
+        # print(proper_genome)
         for chromosome_number in range(len(proper_genome[0])):
             for gene_name in proper_genome[0][chromosome_number]:
                 if random.random() < self.crossover_rate:
                     place_holder = proper_genome[0][chromosome_number][gene_name]
                     proper_genome[0][chromosome_number][gene_name] = proper_genome[1][chromosome_number][gene_name]
                     proper_genome[1][chromosome_number][gene_name] = place_holder
+        gamete = []
+        for chromosome_number in range(len(proper_genome[0])):
+            gamete.append(proper_genome[0][chromosome_number])
+        return gamete
     def new(self):
         return Eukaryote(self.genome, self.energy, (self.x, self.y))
-    def reproduction(self,closest_target):
-        if isinstance(closest_target,Eukaryote):
-            #reproduction
-            pass
+    def reproduction(self, target): #WIP
+        if isinstance(target, Eukaryote):
+            if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1: #reproduction
+                if self.energy > self.energy_cap * 1.5 and target.energy > target.energy_cap * 1.5:
+                    for offspring_index in range(self.offspring):
+                        self_gamete = self.meiosis()
+                        target_gamete = target.meiosis()
         else:
             #add some food class? Do you want me to do that
             pass
 rabbit = Eukaryote([{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 20, (0, 0))
-eukaryotes = [None] * 8
-for index in range(len(eukaryotes)):
-    eukaryotes[index] = rabbit.new()
-    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
-    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+# eukaryotes = [None] * 8
+# for index in range(len(eukaryotes)):
+#     eukaryotes[index] = rabbit.new()
+#     eukaryotes[index].x = random.randint(0, scr.screen_size[0])
+#     eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+eukaryotes = [rabbit.new(), rabbit.new()]
 
-
+print(rabbit.meiosis())
 # class Eukaryote:
 # 	def __init__(self, genome, energy):
 # 		self.genome = genome

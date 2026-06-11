@@ -8,28 +8,40 @@ import numpy as np
 from numba import njit, prange
 clock = pygame.time.Clock()
 
+def class_to_numpy(cls):
+    result = [None] * len(cls)
+    for index in range(len(cls)):
+        result[index] = [cls[index].x, cls[index].y, cls[index].sensing_range]
+    return np.array(result)
+
 @njit(parallel=True,fastmath=True)
-def detect_closest(cell_pos,targt_pos,sensing_range):
-    num_cells = cell_pos.shape[0]
-    num_targets=targt_pos.shape[0]
+def detect_closest(cell_pos, targt_pos):
+    num_cells = len(cell_pos)
+    num_targets = len(targt_pos)
 
     closest_ind = np.full(num_cells,-1,dtype=np.int32)
 
     for i in prange(num_cells):
-        cx,cy = cell_pos[i,0], cell_pos[i,1]
+        cx = cell_pos[i, 0]
+        cy = cell_pos[i, 1]
         closest_idx = -1
-        min_dist = sensing_range
+        min_dist = cell_pos[i, 2]
 
         for j in range(num_targets):
-            tx,ty = targt_pos[j,0], targt_pos[j,1]
+            if i != j:
+                tx = targt_pos[j][0]
+                ty = targt_pos[j][1]
 
-            dx = tx-cx
-            dy=ty-cy
-            distance = math.hypot(dx,dy)
-            if distance<min_dist:
-                min_dist=distance
-                closest_idx = j
+                dx = tx - cx
+                dy = ty - cy
+                distance = math.hypot(dx, dy)
+                if distance<min_dist:
+                    min_dist=distance
+                    closest_idx = j
         closest_ind[i] = closest_idx
+    # for index in range(num_cells):
+    #     if closest_ind[index] == -1:
+    #         closest_ind[index] = None
     return closest_ind
 
 while var.game:
@@ -39,6 +51,13 @@ while var.game:
             var.game = False
     scr.screen.fill((255,255,255))
     for eukaryote in euk.eukaryotes:
-        eukaryote.run()
+        # eukaryote.run()
         eukaryote.display()
+    euk_raw = class_to_numpy(euk.eukaryotes)
+    # print(detect_closest(euk_raw, euk_raw))
+    euk_closest = detect_closest(euk_raw, euk_raw)
+    for index in range(len(euk_closest)):
+        if euk_closest[index] != -1:
+            euk.eukaryotes[index]
     pygame.display.update()
+    var.game = False
