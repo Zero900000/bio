@@ -8,12 +8,16 @@ import numpy as np
 from numba import njit, prange
 clock = pygame.time.Clock()
 
-def class_to_numpy(cls):
+def class_to_numpy_detect(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
         result[index] = [cls[index].x, cls[index].y, cls[index].sensing_range]
     return np.array(result)
-
+def class_to_numpy_interact(cls):
+    result = [None] * len(cls)
+    for index in range(len(cls)):
+        result[index] = [cls[index].x, cls[index].y, cls[index].interaction_range]
+    return np.array(result)
 @njit(parallel=True,fastmath=True)
 def detect_closest(cell_pos, targt_pos):
     num_cells = len(cell_pos)
@@ -53,13 +57,19 @@ while var.game:
     for eukaryote in euk.eukaryotes:
         # eukaryote.run()
         eukaryote.display()
-    euk_raw = class_to_numpy(euk.eukaryotes)
+    euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
+    euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
     # print(detect_closest(euk_raw, euk_raw))
-    euk_closest = detect_closest(euk_raw, euk_raw)
+    euk_closest = detect_closest(euk_raw_detect, euk_raw_detect)
+    euk_interact = detect_closest(euk_raw_interact, euk_raw_interact)
     for index in range(len(euk_closest)):
-        other_index = euk_closest[index]
-        if other_index != -1:
-            euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index])
+        other_index_det = euk_closest[index]
+        if other_index_det != -1:
+            # euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index])
+            euk.eukaryotes[index].behavior(other_index_det, euk.eukaryotes)
+        other_index_inter = euk_interact[index]
+        if other_index_inter != -1:
+            euk.eukaryotes[index].reproduction(other_index_inter)
     pygame.display.update()
     print(len(euk.eukaryotes))
-    var.game = False
+    # var.game = False
