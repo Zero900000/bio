@@ -1,6 +1,7 @@
 import math
 import random
 import scr
+import tri
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
 # digestion speed / efficiency (more speed = less efficiency), cold or warmblooded, photosynthetic, mutation resistance,
 # number of offspring, crossover rate
@@ -19,7 +20,6 @@ class Speed:
     def express(self, organism):
         organism.speed += self.value
         organism.energy_consumption += (self.value * 0.1)
-
 class Photosynthetic:
     def __init__(self, dominant: bool, value = None):
         self.dominant = dominant
@@ -34,7 +34,20 @@ class Photosynthetic:
             organism.is_photosynthetic = True
             organism.speed /= self.value
             organism.energy_consumption_change += self.value
-
+# class Color:
+#     def __init__(self, dominant: bool, value = None):
+#         self.dominant = dominant
+#         self.value = value
+#         if value is None:
+#             if self.dominant:
+#                 self.value = (255, 255, 255)
+#             else:
+#                 self.value = (127, 127, 127)
+#     def express(self, organism):
+#         if self.value > 0.0:
+#             organism.is_photosynthetic = True
+#             organism.speed /= self.value
+#             organism.energy_consumption_change += self.value
 #genes
 class Gene:
     def __init__(self, allele_pair: tuple):
@@ -50,13 +63,14 @@ class Eukaryote:
         self.energy = energy
         self.x = pos[0]
         self.y = pos[1]
+        self.energy_consumption = 0.0
         self.age = 0
         self.speed = 0.0
         self.is_photosynthetic = False
-        self.energy_consumption = 0.0
         self.crossover_rate = 0.2
         self.color = (0,0,0)
-        self.sensing_range = 5
+        self.sensing_range = 30
+        self.interaction_range = 5
         self.sexual_compatibility = 4.0
         self.energy_cap = 10.0
         self.offspring = 2
@@ -84,6 +98,20 @@ class Eukaryote:
     def run(self):
         self.age += 1
         self.energy -= self.energy_consumption
+    def behavior(self, closest_index, closest_list):
+        if closest_index == -1:
+            move = tri.vector_to_coord((self.speed, random.randint(0, 360)))
+        else:
+            target_pos = closest_list[closest_index].x, closest_list[closest_index].y
+            target_offset = target_pos[0] - self.x, target_pos[1] - self.y
+            target_vector = tri.coord_to_vector(target_offset)
+            print(target_vector)
+            if target_vector[0] < self.speed or target_vector[0] < self.interaction_range:
+                move = 0, 0
+            else:
+                move = tri.vector_to_coord((self.speed, target_vector[1]))
+        self.x += move[0]
+        self.y += move[1]
     def display(self):
         size = (self.energy, self.energy)
         scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
@@ -147,13 +175,14 @@ class Eukaryote:
         else:
             #add some food class? Do you want me to do that
             pass
-rabbit = Eukaryote([{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 50, (0, 0))
+rabbit = Eukaryote([{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 5, (150, 150))
 # eukaryotes = [None] * 8
 # for index in range(len(eukaryotes)):
 #     eukaryotes[index] = rabbit.new()
 #     eukaryotes[index].x = random.randint(0, scr.screen_size[0])
 #     eukaryotes[index].y = random.randint(0, scr.screen_size[1])
 eukaryotes = [rabbit.new(), rabbit.new()]
+eukaryotes[1].x += 29
 
 print(rabbit.meiosis())
 # class Eukaryote:
