@@ -126,13 +126,25 @@ class Eukaryote:
         return gamete
     def new(self):
         return Eukaryote(self.genome, self.energy, (self.x, self.y))
-    def reproduction(self, target): #WIP
+    def reproduction(self, target, population = None):#WIP
+        if population is None:
+            population = eukaryotes
         if isinstance(target, Eukaryote):
             if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1: #reproduction
-                if self.energy > self.energy_cap * 1.5 and target.energy > target.energy_cap * 1.5:
+                self_cost = self.energy_cap * self.offspring
+                if self.energy > self_cost * 1.5 and target.energy > target.energy_cap * target.offspring * 1.5:
+                    self.energy -= self_cost
                     for offspring_index in range(self.offspring):
                         self_gamete = self.meiosis()
                         target_gamete = target.meiosis()
+                        new_genome = self.genome
+                        gamete_index = 0
+                        for chromosome in new_genome:
+                            for gene in chromosome:
+                                chromosome[gene].allele[0] = self_gamete[gamete_index]
+                                chromosome[gene].allele[1] = target_gamete[gamete_index]
+                                gamete_index += 1
+                        population.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
         else:
             #add some food class? Do you want me to do that
             pass
