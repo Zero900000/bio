@@ -57,7 +57,9 @@ while var.game:
     # print(detect_closest(euk_raw, euk_raw))
     euk_closest = detect_closest(euk_raw, euk_raw)
     for index in range(len(euk_closest)):
-        if euk_closest[index] != -1:
-            euk.eukaryotes[index]
+        other_index = euk_closest[index]
+        if other_index != -1:
+            euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index])
     pygame.display.update()
+    print(len(euk.eukaryotes))
     var.game = False

@@ -141,14 +141,13 @@ class Eukaryote:
                         gamete_index = 0
                         for chromosome in new_genome:
                             for gene in chromosome:
-                                chromosome[gene].allele[0] = self_gamete[gamete_index]
-                                chromosome[gene].allele[1] = target_gamete[gamete_index]
+                                chromosome[gene].alleles = self_gamete[gamete_index], target_gamete[gamete_index]
                                 gamete_index += 1
                         population.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
         else:
             #add some food class? Do you want me to do that
             pass
-rabbit = Eukaryote([{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 20, (0, 0))
+rabbit = Eukaryote([{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 50, (0, 0))
 # eukaryotes = [None] * 8
 # for index in range(len(eukaryotes)):
 #     eukaryotes[index] = rabbit.new()
