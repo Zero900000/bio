@@ -1,5 +1,7 @@
 import math
 import random
+from idlelib.macosx import hideTkConsole
+
 import scr
 import tri
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
@@ -33,7 +35,7 @@ class Photosynthetic:
         if self.value > 0.0:
             organism.is_photosynthetic = True
             organism.speed /= self.value
-            organism.energy_consumption_change += self.value
+            organism.energy_consumption += self.value
 # class Color:
 #     def __init__(self, dominant: bool, value = None):
 #         self.dominant = dominant
@@ -113,7 +115,9 @@ class Eukaryote:
         self.x += move[0]
         self.y += move[1]
     def display(self):
-        size = (self.energy, self.energy)
+        print(self.energy)
+        side_length = math.sqrt(self.energy)
+        size = (side_length, side_length)
         scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
     # def detect_closest(self,targets):
     #
@@ -175,14 +179,14 @@ class Eukaryote:
         else:
             #add some food class? Do you want me to do that
             pass
-rabbit = Eukaryote([{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False)))}], 5, (150, 150))
-# eukaryotes = [None] * 8
-# for index in range(len(eukaryotes)):
-#     eukaryotes[index] = rabbit.new()
-#     eukaryotes[index].x = random.randint(0, scr.screen_size[0])
-#     eukaryotes[index].y = random.randint(0, scr.screen_size[1])
-eukaryotes = [rabbit.new(), rabbit.new()]
-eukaryotes[1].x += 29
+rabbit = Eukaryote([{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True)))}], 5, (150, 150))
+eukaryotes = [None] * 8
+for index in range(len(eukaryotes)):
+    eukaryotes[index] = rabbit.new()
+    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
+    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+# eukaryotes = [rabbit.new(), rabbit.new()]
+# eukaryotes[1].x += 29
 
 print(rabbit.meiosis())
 # class Eukaryote:

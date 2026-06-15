@@ -55,7 +55,7 @@ while var.game:
             var.game = False
     scr.screen.fill((255,255,255))
     for eukaryote in euk.eukaryotes:
-        # eukaryote.run()
+        eukaryote.run()
         eukaryote.display()
     euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
     euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
@@ -64,9 +64,8 @@ while var.game:
     euk_interact = detect_closest(euk_raw_interact, euk_raw_interact)
     for index in range(len(euk_closest)):
         other_index_det = euk_closest[index]
-        if other_index_det != -1:
             # euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index])
-            euk.eukaryotes[index].behavior(other_index_det, euk.eukaryotes)
+        euk.eukaryotes[index].behavior(other_index_det, euk.eukaryotes)
         other_index_inter = euk_interact[index]
         if other_index_inter != -1:
             euk.eukaryotes[index].reproduction(other_index_inter)
