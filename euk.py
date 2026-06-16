@@ -107,7 +107,7 @@ class Eukaryote:
             target_pos = closest_list[closest_index].x, closest_list[closest_index].y
             target_offset = target_pos[0] - self.x, target_pos[1] - self.y
             target_vector = tri.coord_to_vector(target_offset)
-            print(target_vector)
+            # print(target_vector)
             if target_vector[0] < self.speed or target_vector[0] < self.interaction_range:
                 move = 0, 0
             else:
@@ -161,10 +161,15 @@ class Eukaryote:
     def reproduction(self, target, population = None):#WIP
         if population is None:
             population = eukaryotes
+        # print(type(self))
+        # print(type(target))
         if isinstance(target, Eukaryote):
+            # print("passed same family")
             if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1: #reproduction
+                # print("passed compatibility")
                 self_cost = self.energy_cap * self.offspring
-                if self.energy > self_cost * 1.5 and target.energy > target.energy_cap * target.offspring * 1.5:
+                if (self.energy > self_cost * 1.5) and (target.energy > target.energy_cap * target.offspring * 1.5):
+                    # print("passed energy availabiliy")
                     self.energy -= self_cost
                     for offspring_index in range(self.offspring):
                         self_gamete = self.meiosis()
@@ -183,8 +188,8 @@ rabbit = Eukaryote([{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynth
 eukaryotes = [None] * 8
 for index in range(len(eukaryotes)):
     eukaryotes[index] = rabbit.new()
-    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
-    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+    # eukaryotes[index].x = random.randint(0, scr.screen_size[0])
+    # eukaryotes[index].y = random.randint(0, scr.screen_size[1])
 # eukaryotes = [rabbit.new(), rabbit.new()]
 # eukaryotes[1].x += 29
 

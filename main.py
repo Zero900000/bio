@@ -68,18 +68,18 @@ while var.game:
     euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
     euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
     # print(detect_closest(euk_raw, euk_raw))
+    print(len(euk.eukaryotes))
     if len(euk.eukaryotes) > 0:
         euk_closest = detect_closest(euk_raw_detect, euk_raw_detect)
         euk_interact = detect_closest(euk_raw_interact, euk_raw_interact)
-
-        print(len(euk.eukaryotes))
         for index in range(len(euk_closest)):
             other_index_det = euk_closest[index]
                 # euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index])
             euk.eukaryotes[index].behavior(other_index_det, euk.eukaryotes)
             other_index_inter = euk_interact[index]
             if other_index_inter != -1:
-                euk.eukaryotes[index].reproduction(other_index_inter)
+                # print("attempting reproduction")
+                euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index_inter])
     pygame.display.update()
     # print(len(euk.eukaryotes))
     # var.game = False
