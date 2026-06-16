@@ -28,14 +28,14 @@ class Photosynthetic:
         self.value = value
         if value is None:
             if self.dominant:
-                self.value = 2.0
+                self.value = 4.0
             else:
                 self.value = 0.0
     def express(self, organism):
         if self.value > 0.0:
             organism.is_photosynthetic = True
             organism.speed /= self.value
-            organism.energy_consumption += self.value
+            organism.energy_consumption -= self.value
 # class Color:
 #     def __init__(self, dominant: bool, value = None):
 #         self.dominant = dominant
@@ -115,7 +115,7 @@ class Eukaryote:
         self.x += move[0]
         self.y += move[1]
     def display(self):
-        print(self.energy)
+        # print(self.energy)
         side_length = math.sqrt(self.energy)
         size = (side_length, side_length)
         scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
@@ -175,7 +175,7 @@ class Eukaryote:
                             for gene in chromosome:
                                 chromosome[gene].alleles = self_gamete[gamete_index], target_gamete[gamete_index]
                                 gamete_index += 1
-                        population.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
+                        eukaryotes.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
         else:
             #add some food class? Do you want me to do that
             pass
@@ -188,7 +188,7 @@ for index in range(len(eukaryotes)):
 # eukaryotes = [rabbit.new(), rabbit.new()]
 # eukaryotes[1].x += 29
 
-print(rabbit.meiosis())
+# print(rabbit.meiosis())
 # class Eukaryote:
 # 	def __init__(self, genome, energy):
 # 		self.genome = genome

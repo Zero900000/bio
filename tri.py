@@ -27,7 +27,7 @@ def coord_to_vector(coord):
         elif coord[1] < 0:
             direction = 360 - direction
     return magnitude, direction
-print(vector_to_coord((33, 136)))
+# print(vector_to_coord((33, 136)))
 # for degree in range(360):
 #     result_coord = vector_to_coord((1, degree))
 #     result_degree = coord_to_vector(result_coord)[1]
