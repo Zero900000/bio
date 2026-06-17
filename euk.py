@@ -1,6 +1,5 @@
 import math
 import random
-from idlelib.macosx import hideTkConsole
 
 import scr
 import tri
@@ -36,6 +35,14 @@ class Photosynthetic:
             organism.is_photosynthetic = True
             organism.speed /= self.value
             organism.energy_consumption -= self.value
+class Herbivore:
+    def __init__(self, dominant: bool, value = None):
+        self.dominant = dominant
+        self.value = value
+        if value is None:
+            self.value = self.dominant
+    def express(self, organism):
+        organism.herbivore = self.value
 # class Color:
 #     def __init__(self, dominant: bool, value = None):
 #         self.dominant = dominant
@@ -63,6 +70,7 @@ class Eukaryote:
     def __init__(self, genome, energy, pos): #added x and y for detection
         self.genome = genome
         self.energy = energy
+        self.radius = math.sqrt(self.energy)
         self.x = pos[0]
         self.y = pos[1]
         self.energy_consumption = 0.0
@@ -76,6 +84,8 @@ class Eukaryote:
         self.sexual_compatibility = 4.0
         self.energy_cap = 10.0
         self.offspring = 2
+        self.herbivore = False
+        self.carnivore = False
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
             for gene in chromosome:
@@ -104,14 +114,18 @@ class Eukaryote:
         if closest_index == -1:
             move = tri.vector_to_coord((self.speed, random.randint(0, 360)))
         else:
+            target = closest_list[closest_index]
             target_pos = closest_list[closest_index].x, closest_list[closest_index].y
             target_offset = target_pos[0] - self.x, target_pos[1] - self.y
             target_vector = tri.coord_to_vector(target_offset)
-            # print(target_vector)
-            if target_vector[0] < self.speed or target_vector[0] < self.interaction_range:
-                move = 0, 0
+            if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1 or (self.carnivore and not target.is_photosynthetic) or (self.herbivore and target.is_photosynthetic):
+                # print(target_vector)
+                if target_vector[0] < self.speed or target_vector[0] < self.interaction_range:
+                    move = 0, 0
+                else:
+                    move = tri.vector_to_coord((self.speed, target_vector[1]))
             else:
-                move = tri.vector_to_coord((self.speed, target_vector[1]))
+                move = tri.vector_to_coord((- self.speed, target_vector[1]))
         self.x += move[0]
         self.y += move[1]
     def display(self):
@@ -163,33 +177,57 @@ class Eukaryote:
             population = eukaryotes
         # print(type(self))
         # print(type(target))
-        if isinstance(target, Eukaryote):
-            # print("passed same family")
-            if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1: #reproduction
-                # print("passed compatibility")
-                self_cost = self.energy_cap * self.offspring
-                if (self.energy > self_cost * 1.5) and (target.energy > target.energy_cap * target.offspring * 1.5):
-                    # print("passed energy availabiliy")
-                    self.energy -= self_cost
-                    for offspring_index in range(self.offspring):
-                        self_gamete = self.meiosis()
-                        target_gamete = target.meiosis()
-                        new_genome = self.genome
-                        gamete_index = 0
-                        for chromosome in new_genome:
-                            for gene in chromosome:
-                                chromosome[gene].alleles = self_gamete[gamete_index], target_gamete[gamete_index]
-                                gamete_index += 1
-                        eukaryotes.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
+         #reproduction
+        self_cost = self.energy_cap * self.offspring
+        if (self.energy > self_cost * 1.5) and (target.energy > target.energy_cap * target.offspring * 1.5):
+            # print("passed energy availabiliy")
+            self.energy -= self_cost
+            for offspring_index in range(self.offspring):
+                self_gamete = self.meiosis()
+                target_gamete = target.meiosis()
+                new_genome = self.genome
+                gamete_index = 0
+                # print(self_gamete)
+                # print(target_gamete)
+                for chromosome in new_genome:
+                    for gene in chromosome:
+                        chromosome[gene].alleles = self_gamete[gamete_index][gene], target_gamete[gamete_index][gene]
+                    gamete_index += 1
+
+                population.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
+
+    def eat(self, target):
+        print("organism eaten for " + str(self.energy) + " energy")
+        self.energy += target.energy
+        target.energy = -1
+    def interact(self, target, population = None):
+        if population is None:
+            population = eukaryotes
+        if isinstance(target, Eukaryote) and abs(self.sexual_compatibility - target.sexual_compatibility) <= 1:
+            self.reproduction(target, population)
         else:
-            #add some food class? Do you want me to do that
-            pass
-rabbit = Eukaryote([{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True)))}], 5, (150, 150))
-eukaryotes = [None] * 8
+            if (self.herbivore and target.is_photosynthetic) or (self.carnivore and not (target.is_photosynthetic or target.carnivore)):
+                self.eat(target)
+
+
+center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
+e = 40
+producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}]
+rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(False)))}]
+producer = Eukaryote(producer_genome, e, center)
+rabbit = Eukaryote(rabbit_genome, e, center)
+
+eukaryotes = [None] * 60
 for index in range(len(eukaryotes)):
-    eukaryotes[index] = rabbit.new()
-    # eukaryotes[index].x = random.randint(0, scr.screen_size[0])
-    # eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+    if index > len(eukaryotes) * 0.5:
+        eukaryotes[index] = producer.new()
+    else:
+        eukaryotes[index] = rabbit.new()
+        eukaryotes[index].sexual_compatibility = 2.0
+    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
+    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
+
+
 # eukaryotes = [rabbit.new(), rabbit.new()]
 # eukaryotes[1].x += 29
 

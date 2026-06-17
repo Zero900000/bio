@@ -56,8 +56,7 @@ while var.game:
             var.game = False
     scr.screen.fill((255,255,255))
     death_index = 0
-    for eukaryote in euk.eukaryotes:
-        eukaryote.run()
+
     while death_index <= len(euk.eukaryotes) - 1:
         if euk.eukaryotes[death_index].energy <= 0.0:
             euk.eukaryotes.pop(death_index)
@@ -65,6 +64,7 @@ while var.game:
             death_index += 1
     for eukaryote in euk.eukaryotes:
         eukaryote.display()
+        eukaryote.run()
     euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
     euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
     # print(detect_closest(euk_raw, euk_raw))
@@ -79,7 +79,7 @@ while var.game:
             other_index_inter = euk_interact[index]
             if other_index_inter != -1:
                 # print("attempting reproduction")
-                euk.eukaryotes[index].reproduction(euk.eukaryotes[other_index_inter])
+                euk.eukaryotes[index].interact(euk.eukaryotes[other_index_inter], euk.eukaryotes)
     pygame.display.update()
     # print(len(euk.eukaryotes))
     # var.game = False
