@@ -114,24 +114,24 @@ class Eukaryote:
         move = 0, 0
         dx = self.x - self.target_pos[0]
         dy = self.y - self.target_pos[1]
-        if math.sqrt(dx ** 2 + dy ** 2) > self.sensing_range:
+        if math.sqrt(dx ** 2 + dy ** 2) > self.interaction_range:
             move = tri.vector_to_coord((self.speed, tri.coord_to_vector((dx, dy))[1]))
         # print(move)
         self.x -= move[0]
         self.y -= move[1]
     def behavior(self, closest_index, closest_list):
         # print(closest_index)
+
         if closest_index == -1:
             # print("no closest behavior")
             dx = self.x - self.target_pos[0]
             dy = self.y - self.target_pos[1]
-            print(math.sqrt(dx**2 + dy**2))
+            if self.herbivore: print(dx, dy)
             if math.sqrt(dx**2 + dy**2) < self.interaction_range:
                 self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
-                print("new random target: " + str(self.target_pos))
+                if self.herbivore: print("new random target: " + str(self.target_pos))
 
         else:
-
             target = closest_list[closest_index]
             target_pos = closest_list[closest_index].x, closest_list[closest_index].y
             target_offset = target_pos[0] - self.x, target_pos[1] - self.y
@@ -143,9 +143,10 @@ class Eukaryote:
                 if target_vector[0] < self.interaction_range:
                     self.target_pos = self.x, self.y
                 else:
-                    move = tri.vector_to_coord((self.speed, target_vector[1]))
+                    self.target_pos = target.x, target.y
             else:
-                move = tri.vector_to_coord((- self.speed, target_vector[1]))
+                self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
+                if self.herbivore: print("encountered non-interactable organism:", self.target_pos)
         # self.x += move[0]
         # self.y += move[1]
     def display(self):
@@ -219,7 +220,7 @@ class Eukaryote:
     def eat(self, target):
         print("organism eaten for " + str(self.energy) + " energy")
         self.energy += target.energy
-        target.energy = -1
+        target.energy = -99
     def interact(self, target, population = None):
         if population is None:
             population = eukaryotes
@@ -233,7 +234,7 @@ class Eukaryote:
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
 e = 40
 producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}]
-rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(False)))}]
+rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
