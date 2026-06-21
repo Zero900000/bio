@@ -60,6 +60,7 @@ while var.game:
     while death_index <= len(euk.eukaryotes) - 1:
         if euk.eukaryotes[death_index].energy <= 0.0:
             euk.eukaryotes.pop(death_index)
+            print("an organism has died")
         else:
             death_index += 1
     for eukaryote in euk.eukaryotes:
@@ -68,7 +69,7 @@ while var.game:
     euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
     euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
     # print(detect_closest(euk_raw, euk_raw))
-    print(len(euk.eukaryotes))
+    # print("population: " + str(len(euk.eukaryotes)))
     if len(euk.eukaryotes) > 0:
         euk_closest = detect_closest(euk_raw_detect, euk_raw_detect)
         euk_interact = detect_closest(euk_raw_interact, euk_raw_interact)

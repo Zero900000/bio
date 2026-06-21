@@ -27,7 +27,7 @@ class Photosynthetic:
         self.value = value
         if value is None:
             if self.dominant:
-                self.value = 4.0
+                self.value = 1.0
             else:
                 self.value = 0.0
     def express(self, organism):
@@ -73,12 +73,13 @@ class Eukaryote:
         self.radius = math.sqrt(self.energy)
         self.x = pos[0]
         self.y = pos[1]
+        self.target_pos = pos
         self.energy_consumption = 0.0
         self.age = 0
         self.speed = 0.0
         self.is_photosynthetic = False
         self.crossover_rate = 0.2
-        self.color = (0,0,0)
+        self.color = (0, 0, 0)
         self.sensing_range = 30
         self.interaction_range = 5
         self.sexual_compatibility = 4.0
@@ -110,24 +111,43 @@ class Eukaryote:
     def run(self):
         self.age += 1
         self.energy -= self.energy_consumption
+        move = 0, 0
+        dx = self.x - self.target_pos[0]
+        dy = self.y - self.target_pos[1]
+        if math.sqrt(dx ** 2 + dy ** 2) > self.sensing_range:
+            move = tri.vector_to_coord((self.speed, tri.coord_to_vector((dx, dy))[1]))
+        # print(move)
+        self.x -= move[0]
+        self.y -= move[1]
     def behavior(self, closest_index, closest_list):
+        # print(closest_index)
         if closest_index == -1:
-            move = tri.vector_to_coord((self.speed, random.randint(0, 360)))
+            # print("no closest behavior")
+            dx = self.x - self.target_pos[0]
+            dy = self.y - self.target_pos[1]
+            print(math.sqrt(dx**2 + dy**2))
+            if math.sqrt(dx**2 + dy**2) < self.interaction_range:
+                self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
+                print("new random target: " + str(self.target_pos))
+
         else:
+
             target = closest_list[closest_index]
             target_pos = closest_list[closest_index].x, closest_list[closest_index].y
             target_offset = target_pos[0] - self.x, target_pos[1] - self.y
             target_vector = tri.coord_to_vector(target_offset)
-            if abs(self.sexual_compatibility - target.sexual_compatibility) <= 1 or (self.carnivore and not target.is_photosynthetic) or (self.herbivore and target.is_photosynthetic):
+            can_reproduce = (abs(self.sexual_compatibility - target.sexual_compatibility) <= 1.0 and self.energy > self.energy_cap * 1.5 * self.offspring)
+            is_food = (self.carnivore and not target.is_photosynthetic) or (self.herbivore and target.is_photosynthetic)
+            if can_reproduce or is_food:
                 # print(target_vector)
-                if target_vector[0] < self.speed or target_vector[0] < self.interaction_range:
-                    move = 0, 0
+                if target_vector[0] < self.interaction_range:
+                    self.target_pos = self.x, self.y
                 else:
                     move = tri.vector_to_coord((self.speed, target_vector[1]))
             else:
                 move = tri.vector_to_coord((- self.speed, target_vector[1]))
-        self.x += move[0]
-        self.y += move[1]
+        # self.x += move[0]
+        # self.y += move[1]
     def display(self):
         # print(self.energy)
         side_length = math.sqrt(self.energy)
@@ -217,16 +237,18 @@ rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic"
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
-eukaryotes = [None] * 60
+eukaryotes = [None] * 10
 for index in range(len(eukaryotes)):
     if index > len(eukaryotes) * 0.5:
         eukaryotes[index] = producer.new()
     else:
         eukaryotes[index] = rabbit.new()
         eukaryotes[index].sexual_compatibility = 2.0
-    eukaryotes[index].x = random.randint(0, scr.screen_size[0])
-    eukaryotes[index].y = random.randint(0, scr.screen_size[1])
-
+    rand_x = random.randint(0, scr.screen_size[0])
+    rand_y = random.randint(0, scr.screen_size[1])
+    eukaryotes[index].x = rand_x
+    eukaryotes[index].y = rand_y
+    eukaryotes[index].target_pos = rand_x, rand_y
 
 # eukaryotes = [rabbit.new(), rabbit.new()]
 # eukaryotes[1].x += 29
