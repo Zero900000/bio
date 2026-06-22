@@ -70,7 +70,6 @@ class Eukaryote:
     def __init__(self, genome, energy, pos): #added x and y for detection
         self.genome = genome
         self.energy = energy
-        self.radius = math.sqrt(self.energy)
         self.x = pos[0]
         self.y = pos[1]
         self.target_pos = pos
@@ -87,12 +86,16 @@ class Eukaryote:
         self.offspring = 2
         self.herbivore = False
         self.carnivore = False
+        self.size = 0
+        if self.energy > 0.0:
+            self.size = self.size
         # 1. Dynamically express all alleles (attaches .photosynthetic, .sensing_range, etc.)
         for chromosome in self.genome:
             for gene in chromosome:
                 chromosome[gene].phen.express(self)
         if self.is_photosynthetic:
             self.color = (0, 127, 0)
+        # self.radius = self.size
 
 #hasattr basically checks if an object jas a specific attribute or not
         if not hasattr(self, "sensing_range"): self.sensing_range = 30.0
@@ -119,6 +122,10 @@ class Eukaryote:
         # print(move)
         self.x -= move[0]
         self.y -= move[1]
+        if self.energy > 0.0:
+            self.size = math.sqrt(self.energy)
+        else:
+            self.size = 0
     def behavior(self, closest_index, closest_list):
         # print(closest_index)
 
@@ -126,10 +133,10 @@ class Eukaryote:
             # print("no closest behavior")
             dx = self.x - self.target_pos[0]
             dy = self.y - self.target_pos[1]
-            if self.herbivore: print(dx, dy)
+            # if self.herbivore: print(dx, dy)
             if math.sqrt(dx**2 + dy**2) < self.interaction_range:
                 self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
-                if self.herbivore: print("new random target: " + str(self.target_pos))
+                # print("new random target: " + str(self.target_pos))
 
         else:
             target = closest_list[closest_index]
@@ -146,12 +153,12 @@ class Eukaryote:
                     self.target_pos = target.x, target.y
             else:
                 self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
-                if self.herbivore: print("encountered non-interactable organism:", self.target_pos)
+                # print("encountered non-interactable organism:", self.target_pos)
         # self.x += move[0]
         # self.y += move[1]
     def display(self):
-        # print(self.energy)
-        side_length = math.sqrt(self.energy)
+        # print(self.size)
+        side_length = self.size
         size = (side_length, side_length)
         scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
     # def detect_closest(self,targets):
@@ -202,7 +209,7 @@ class Eukaryote:
         self_cost = self.energy_cap * self.offspring
         if (self.energy > self_cost * 1.5) and (target.energy > target.energy_cap * target.offspring * 1.5):
             # print("passed energy availabiliy")
-            self.energy -= self_cost
+            # print(self.energy)
             for offspring_index in range(self.offspring):
                 self_gamete = self.meiosis()
                 target_gamete = target.meiosis()
@@ -214,9 +221,25 @@ class Eukaryote:
                     for gene in chromosome:
                         chromosome[gene].alleles = self_gamete[gamete_index][gene], target_gamete[gamete_index][gene]
                     gamete_index += 1
-
-                population.append(Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, (self.x, self.y)))
-
+                # print(self.energy)
+                displacement = tri.vector_to_coord((self.size + 1, random.randrange(360)))
+                new_pos = self.x + displacement[0], self.y + displacement[1]
+                newborn = Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, new_pos)
+                population.append(newborn)
+                eligible = True
+                for other in population:
+                    if newborn != other:
+                        dx = other.x - newborn.x
+                        dy = other.y - newborn.y
+                        distance = dx**2 + dy**2
+                        if distance > newborn.size + other.size:
+                            eligible = True
+                if eligible:
+                    population.append(newborn)
+                    print(self.energy)
+                    print(self.energy_cap)
+                    self.energy -= self.energy_cap
+                    print(self.energy)
     def eat(self, target):
         print("organism eaten for " + str(self.energy) + " energy")
         self.energy += target.energy

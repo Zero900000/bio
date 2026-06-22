@@ -7,7 +7,8 @@ import var
 import numpy as np
 from numba import njit, prange
 clock = pygame.time.Clock()
-
+stat_update_tick = 0
+stat_update_frequency = 20
 def class_to_numpy_detect(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
@@ -51,6 +52,10 @@ def detect_closest(cell_pos, targt_pos):
 
 while var.game:
     clock.tick(10)
+    if stat_update_tick > stat_update_frequency:
+        stat_update_tick = 0
+        print("population: " + str(len(euk.eukaryotes)))
+    stat_update_tick += 1
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             var.game = False
@@ -69,7 +74,7 @@ while var.game:
     euk_raw_detect = class_to_numpy_detect(euk.eukaryotes) # for normal detection
     euk_raw_interact = class_to_numpy_interact(euk.eukaryotes) # for reprod and other interactions
     # print(detect_closest(euk_raw, euk_raw))
-    print("population: " + str(len(euk.eukaryotes)))
+
     if len(euk.eukaryotes) > 0:
         euk_closest = detect_closest(euk_raw_detect, euk_raw_detect)
         euk_interact = detect_closest(euk_raw_interact, euk_raw_interact)
