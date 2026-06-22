@@ -52,13 +52,20 @@ def detect_closest(cell_pos, targt_pos):
 
 while var.game:
     clock.tick(10)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            var.game = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                var.paused = not var.paused
+                print("population: " + str(len(euk.eukaryotes)))
+    if var.paused:
+        continue
     if stat_update_tick > stat_update_frequency:
         stat_update_tick = 0
         print("population: " + str(len(euk.eukaryotes)))
     stat_update_tick += 1
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            var.game = False
     scr.screen.fill((255,255,255))
     death_index = 0
 

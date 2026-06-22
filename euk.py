@@ -236,10 +236,10 @@ class Eukaryote:
                             eligible = True
                 if eligible:
                     population.append(newborn)
-                    print(self.energy)
-                    print(self.energy_cap)
+                    # print(self.energy)
+                    # print(self.energy_cap)
                     self.energy -= self.energy_cap
-                    print(self.energy)
+                    # print(self.energy)
     def eat(self, target):
         print("organism eaten for " + str(self.energy) + " energy")
         self.energy += target.energy
@@ -256,14 +256,14 @@ class Eukaryote:
 
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
 e = 40
-producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}]
+producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(True), Herbivore(False)))}]
 rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
 eukaryotes = [None] * 10
 for index in range(len(eukaryotes)):
-    if index > len(eukaryotes) * 0.5:
+    if index > len(eukaryotes) * 0.25:
         eukaryotes[index] = producer.new()
     else:
         eukaryotes[index] = rabbit.new()
