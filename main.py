@@ -8,7 +8,6 @@ import var
 import numpy as np
 from numba import njit, prange
 import settings
-from inp import automatic_updates
 
 clock = pygame.time.Clock()
 stat_update_tick = 0
@@ -109,7 +108,7 @@ while var.game:
     while death_index <= len(euk.eukaryotes) - 1:
         if euk.eukaryotes[death_index].energy <= 0.0:
             euk.eukaryotes.pop(death_index)
-            if automatic_updates: print("an organism has died")
+            if inp.automatic_updates and False: print("an organism has died")
         else:
             death_index += 1
     for eukaryote in euk.eukaryotes:
@@ -131,9 +130,9 @@ while var.game:
                 # print("interacting")
                 euk.eukaryotes[index].interact(euk.eukaryotes[other_index_inter], euk.eukaryotes)
     
-    if len(euk.eukaryotes) > settings.max_population:
-        print("population limit reached, ending simulation")
-        var.game = False
+    # if len(euk.eukaryotes) > settings.max_population:
+    #     print("population limit reached, ending simulation")
+    #     var.game = False
 
     pygame.display.update()
     # print(len(euk.eukaryotes))

@@ -1,1 +1,1 @@
-max_population = 2500
+max_population = 1000

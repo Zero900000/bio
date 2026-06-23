@@ -1,7 +1,7 @@
 import pygame
 import euk
 
-automatic_updates = False
+automatic_updates = True
 
 def calc_allele_frequency(population): #returns a dictionary
     result = {}

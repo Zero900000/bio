@@ -3,6 +3,7 @@ import random
 
 import inp
 import scr
+import settings
 import tri
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
 # digestion speed / efficiency (more speed = less efficiency), cold or warmblooded, photosynthetic, mutation resistance,
@@ -160,7 +161,7 @@ class Eukaryote:
     def display(self):
         # print(self.size)
         side_length = self.size
-        size = side_length * 0.5
+        size = side_length
         scr.circle((self.x - size * 0.5, self.y - size * 0.5), size, self.color)
     # def detect_closest(self,targets):
     #
@@ -223,26 +224,26 @@ class Eukaryote:
                         chromosome[gene].alleles = self_gamete[gamete_index][gene], target_gamete[gamete_index][gene]
                     gamete_index += 1
                 # print(self.energy)
-                displacement = tri.vector_to_coord((self.size + 1, random.randrange(360)))
+                displacement = tri.vector_to_coord((self.size + math.sqrt(self.energy_cap) + 1, random.randrange(360)))
                 new_pos = self.x + displacement[0], self.y + displacement[1]
                 newborn = Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, new_pos)
-                population.append(newborn)
+                # population.append(newborn)
                 eligible = True
                 for other in population:
                     if newborn != other:
                         dx = other.x - newborn.x
                         dy = other.y - newborn.y
-                        distance = dx**2 + dy**2
-                        if distance > newborn.size + other.size:
-                            eligible = True
-                if eligible:
+                        distance = math.sqrt(dx**2 + dy**2)
+                        if distance < newborn.size + other.size and abs(newborn.sexual_compatibility - other.sexual_compatibility) <= 1.0:
+                            eligible = False
+                if eligible and len(eukaryotes) < settings.max_population:
                     population.append(newborn)
                     # print(self.energy)
                     # print(self.energy_cap)
                     self.energy -= self.energy_cap
                     # print(self.energy)
     def eat(self, target):
-        if inp.automatic_updates: print("organism eaten for " + str(self.energy) + " energy")
+        if inp.automatic_updates and False: print("organism eaten for " + str(self.energy) + " energy")
         self.energy += target.energy
         target.energy = -99
     def interact(self, target, population = None):
@@ -266,9 +267,11 @@ eukaryotes = [None] * 20
 for index in range(len(eukaryotes)):
     if index > len(eukaryotes) * 0.25:
         eukaryotes[index] = producer.new()
+        # eukaryotes[index].offspring = 1
     else:
         eukaryotes[index] = rabbit.new()
         eukaryotes[index].sexual_compatibility = 2.0
+        eukaryotes[index].energy_cap += 50
     rand_x = random.randint(0, scr.screen_size[0])
     rand_y = random.randint(0, scr.screen_size[1])
     eukaryotes[index].x = rand_x
