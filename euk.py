@@ -1,6 +1,7 @@
 import math
 import random
 
+import inp
 import scr
 import tri
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
@@ -159,8 +160,8 @@ class Eukaryote:
     def display(self):
         # print(self.size)
         side_length = self.size
-        size = (side_length, side_length)
-        scr.rect((self.x - size[0] * 0.5, self.y - size[1] * 0.5), size, self.color)
+        size = side_length * 0.5
+        scr.circle((self.x - size * 0.5, self.y - size * 0.5), size, self.color)
     # def detect_closest(self,targets):
     #
     #     closest_target = None
@@ -241,7 +242,7 @@ class Eukaryote:
                     self.energy -= self.energy_cap
                     # print(self.energy)
     def eat(self, target):
-        print("organism eaten for " + str(self.energy) + " energy")
+        if inp.automatic_updates: print("organism eaten for " + str(self.energy) + " energy")
         self.energy += target.energy
         target.energy = -99
     def interact(self, target, population = None):
@@ -256,12 +257,12 @@ class Eukaryote:
 
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
 e = 40
-producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(True), Herbivore(False)))}]
+producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}]
 rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
-eukaryotes = [None] * 10
+eukaryotes = [None] * 20
 for index in range(len(eukaryotes)):
     if index > len(eukaryotes) * 0.25:
         eukaryotes[index] = producer.new()
