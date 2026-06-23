@@ -7,7 +7,7 @@ import scr
 import var
 import numpy as np
 from numba import njit, prange
-
+import settings
 from inp import automatic_updates
 
 clock = pygame.time.Clock()
@@ -130,6 +130,11 @@ while var.game:
             if other_index_inter != -1:
                 # print("interacting")
                 euk.eukaryotes[index].interact(euk.eukaryotes[other_index_inter], euk.eukaryotes)
+    
+    if len(euk.eukaryotes) > settings.max_population:
+        print("population limit reached, ending simulation")
+        var.game = False
+
     pygame.display.update()
     # print(len(euk.eukaryotes))
     # var.game = False
