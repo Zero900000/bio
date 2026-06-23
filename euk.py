@@ -45,6 +45,27 @@ class Herbivore:
             self.value = self.dominant
     def express(self, organism):
         organism.herbivore = self.value
+class EnergyCap:
+    def __init__(self, dominant: bool, value = None):
+        self.dominant = dominant
+        self.value = value
+        if value is None:
+            self.value = 10.0
+            if self.dominant:
+                self.value = 50.0
+    def express(self, organism):
+        organism.energy_cap = self.value
+class Offspring:
+    def __init__(self, dominant: bool, value = None):
+        self.dominant = dominant
+        self.value = value
+        if value is None:
+            self.value = 2
+            if self.dominant:
+                self.value = 1
+    def express(self, organism):
+        organism.offspring = self.value
+
 # class Color:
 #     def __init__(self, dominant: bool, value = None):
 #         self.dominant = dominant
@@ -262,20 +283,20 @@ class Eukaryote:
 
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
 e = 40
-producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}]
-rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}]
+producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((EnergyCap(False), EnergyCap(False)))}]
+rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((EnergyCap(True), EnergyCap(True)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
 eukaryotes = [None] * 30
 for index in range(len(eukaryotes)):
-    if index > len(eukaryotes) * 0.25:
+    if index > len(eukaryotes) * 0.1:
         eukaryotes[index] = producer.new()
         # eukaryotes[index].offspring = 1
     else:
         eukaryotes[index] = rabbit.new()
         eukaryotes[index].sexual_compatibility = 1.0
-        eukaryotes[index].energy_cap += 50
+        # eukaryotes[index].energy_cap += 50
     rand_x = random.randint(0, scr.screen_size[0])
     rand_y = random.randint(0, scr.screen_size[1])
     eukaryotes[index].x = rand_x
