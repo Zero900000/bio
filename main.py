@@ -132,10 +132,7 @@ while var.game:
                 # print("interacting")
                 euk.eukaryotes[index].interact(euk.eukaryotes[other_index_inter], euk.eukaryotes)
     
-    if len(euk.eukaryotes) > settings.max_population:
-         print("population limit reached, ending simulation")
-         var.game = False
-    elif len(euk.eukaryotes) == 0:
+    if len(euk.eukaryotes) == 0:
         print("population extinct, ending simulation")
         var.game = False
 
