@@ -118,8 +118,8 @@ class Eukaryote:
                 chromosome[gene].phen.express(self)
         if self.is_photosynthetic:
             self.color = (0, 127, 0)
-        if self.sexual_compatibility != 4.0 and self.is_photosynthetic:
-            self.color = (255, 0, 0)
+        # if self.sexual_compatibility != 4.0:
+        #     self.color = (255, 0, 0)
         # self.radius = self.size
 
 #hasattr basically checks if an object jas a specific attribute or not
@@ -184,8 +184,11 @@ class Eukaryote:
     def display(self):
         # print(self.size)
         side_length = self.size
-        size = side_length
-        scr.circle((self.x - size * 0.5, self.y - size * 0.5), size, self.color)
+        # size = side_length, side_length
+        # if self.sexual_compatibility != 4.0:
+        scr.circle((self.x - side_length * 0.5, self.y - side_length * 0.5), side_length, self.color)
+        # else:
+        #     scr.rect((self.x - side_length * 0.5, self.y - side_length * 0.5), size, self.color)
     # def detect_closest(self,targets):
     #
     #     closest_target = None
@@ -251,7 +254,7 @@ class Eukaryote:
                 new_pos = self.x + displacement[0], self.y + displacement[1]
                 newborn = Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, new_pos)
                 newborn.sexual_compatibility = self.sexual_compatibility
-                newborn.energy_cap = self.energy_cap
+                # newborn.energy_cap = self.energy_cap
                 # population.append(newborn)
                 eligible = True
                 for other in population:
@@ -283,12 +286,12 @@ class Eukaryote:
 
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
 e = 40
-producer_genome = [{"speed" : Gene((Speed(False), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((EnergyCap(False), EnergyCap(False)))}]
-rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((EnergyCap(True), EnergyCap(True)))}]
+producer_genome = [{"speed" : Gene((Speed(True), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((Offspring(True), Offspring(False)))}]
+rabbit_genome = [{"speed" : Gene((Speed(True), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}, {"energy cap" : Gene((EnergyCap(True), EnergyCap(False))), "offspring" : Gene((Offspring(True), Offspring(False)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
-eukaryotes = [None] * 30
+eukaryotes = [None] * 40
 for index in range(len(eukaryotes)):
     if index > len(eukaryotes) * 0.1:
         eukaryotes[index] = producer.new()
