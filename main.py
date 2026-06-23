@@ -15,13 +15,13 @@ stat_update_frequency = 10
 def class_to_numpy_detect(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
-        result[index] = [cls[index].x, cls[index].y, cls[index].sensing_range]
+        result[index] = [cls[index].x, cls[index].y, cls[index].size + cls[index].sensing_range]
     return np.array(result)
 def class_to_numpy_interact(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
         org = cls[index]
-        result[index] = [org.x, org.y, org.interaction_range, org.energy > 1.5 * org.energy_cap * org.offspring, org.sexual_compatibility]
+        result[index] = [org.x, org.y, org.size + org.interaction_range, org.energy > 1.5 * org.energy_cap * org.offspring, org.sexual_compatibility]
     return np.array(result)
 @njit(parallel=True,fastmath=True)
 def detect_closest(cell_pos, targt_pos):
@@ -71,7 +71,7 @@ def detect_closest_inter(cell_pos, targt_pos):
                 dx = tx - cx
                 dy = ty - cy
                 distance = math.hypot(dx, dy)
-                if distance < cell_pos[i, 2] and cell_pos[j][3] and abs(cell_pos[i, 4] - targt_pos[j, 4]) <= 1.0:
+                if distance < cell_pos[i, 2] and cell_pos[i][3] and abs(cell_pos[i, 4] - targt_pos[j, 4]) <= 1.0:
                     closest_idx = j
                     break
                 if distance<min_dist:
@@ -100,6 +100,8 @@ while var.game:
     if inp.automatic_updates:
         if stat_update_tick > stat_update_frequency:
             stat_update_tick = 0
+            print("update:")
+            print(inp.calc_populations(euk.eukaryotes))
             print(inp.status_update())
         stat_update_tick += 1
     scr.screen.fill((255,255,255))

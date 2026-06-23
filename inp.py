@@ -39,6 +39,13 @@ def status_update():
     result += "population: " + str(len(euk.eukaryotes)) + seperator
     result += " " + seperator + allele_frequency_to_str(calc_allele_frequency(euk.eukaryotes)) + seperator
     return result
+def calc_populations(community):
+    result = {}
+    for organism in community:
+        result.update({organism.sexual_compatibility: 0})
+    for organism in community:
+        result[organism.sexual_compatibility] += 1
+    return result
 def detect_commands(event):
     ref = event.key
     if ref == pygame.K_p:

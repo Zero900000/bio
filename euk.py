@@ -97,6 +97,8 @@ class Eukaryote:
                 chromosome[gene].phen.express(self)
         if self.is_photosynthetic:
             self.color = (0, 127, 0)
+        if self.sexual_compatibility != 4.0 and self.is_photosynthetic:
+            self.color = (255, 0, 0)
         # self.radius = self.size
 
 #hasattr basically checks if an object jas a specific attribute or not
@@ -227,6 +229,8 @@ class Eukaryote:
                 displacement = tri.vector_to_coord((self.size + math.sqrt(self.energy_cap) + 1, random.randrange(360)))
                 new_pos = self.x + displacement[0], self.y + displacement[1]
                 newborn = Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, new_pos)
+                newborn.sexual_compatibility = self.sexual_compatibility
+                newborn.energy_cap = self.energy_cap
                 # population.append(newborn)
                 eligible = True
                 for other in population:
@@ -263,14 +267,14 @@ rabbit_genome = [{"speed" : Gene((Speed(True), Speed(True)))}, {"photosynthetic"
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
-eukaryotes = [None] * 20
+eukaryotes = [None] * 30
 for index in range(len(eukaryotes)):
     if index > len(eukaryotes) * 0.25:
         eukaryotes[index] = producer.new()
         # eukaryotes[index].offspring = 1
     else:
         eukaryotes[index] = rabbit.new()
-        eukaryotes[index].sexual_compatibility = 2.0
+        eukaryotes[index].sexual_compatibility = 1.0
         eukaryotes[index].energy_cap += 50
     rand_x = random.randint(0, scr.screen_size[0])
     rand_y = random.randint(0, scr.screen_size[1])
