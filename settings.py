@@ -1,4 +1,4 @@
-max_population = 2000
+max_population = 1500
 
 """
 USER MANUAL
