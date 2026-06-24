@@ -8,7 +8,11 @@ import tri
 #trait list: speed, durability (hp), energy cap (how much energy an organism will acquire before trying to reproduce),
 # digestion speed / efficiency (more speed = less efficiency), cold or warmblooded, photosynthetic, mutation resistance,
 # number of offspring, crossover rate
-
+def new_list(inp):
+    result = [None] * len(inp)
+    for index in range(len(inp)):
+        result[index] = inp[index]
+    return result
 
 #alleles
 class Speed:
@@ -159,7 +163,7 @@ class Eukaryote:
             dx = self.x - self.target_pos[0]
             dy = self.y - self.target_pos[1]
             # if self.herbivore: print(dx, dy)
-            if math.sqrt(dx**2 + dy**2) < self.interaction_range:
+            if math.sqrt(dx**2 + dy**2) < self.interaction_range + self.size:
                 self.target_pos = random.randrange(0, scr.screen_size[0]), random.randrange(0, scr.screen_size[1])
                 # print("new random target: " + str(self.target_pos))
 
@@ -172,7 +176,7 @@ class Eukaryote:
             is_food = (self.carnivore and not target.is_photosynthetic) or (self.herbivore and target.is_photosynthetic)
             if can_reproduce or is_food:
                 # print(target_vector)
-                if target_vector[0] < self.interaction_range:
+                if target_vector[0] < self.interaction_range + self.size + target.size:
                     self.target_pos = self.x, self.y
                 else:
                     self.target_pos = target.x, target.y
@@ -224,7 +228,9 @@ class Eukaryote:
                     proper_genome[1][chromosome_number][gene_name] = place_holder
         gamete = []
         for chromosome_number in range(len(proper_genome[0])):
-            gamete.append(proper_genome[0][chromosome_number])
+            gamete.append(proper_genome[random.randint(0, 1)][chromosome_number])
+        # for chromosome_number in range(len(proper_genome[0])):
+        #     gamete[chromosome_number] = gamete[chromosome_number][random.randint(0, 1)]
         return gamete
     def new(self):
         return Eukaryote(self.genome, self.energy, (self.x, self.y))
@@ -241,18 +247,19 @@ class Eukaryote:
             for offspring_index in range(self.offspring):
                 self_gamete = self.meiosis()
                 target_gamete = target.meiosis()
-                new_genome = self.genome
+                new_genome = []
                 gamete_index = 0
                 # print(self_gamete)
                 # print(target_gamete)
-                for chromosome in new_genome:
-                    for gene in chromosome:
-                        chromosome[gene].alleles = self_gamete[gamete_index][gene], target_gamete[gamete_index][gene]
+                for chromosome_number in range(len(self.genome)):
+                    new_genome.append({})
+                    for gene in self.genome[chromosome_number]:
+                        new_genome[chromosome_number].update({gene : Gene((self_gamete[gamete_index][gene], target_gamete[gamete_index][gene]))})
                     gamete_index += 1
                 # print(self.energy)
-                displacement = tri.vector_to_coord((self.size + math.sqrt(self.energy_cap) + 1, random.randrange(360)))
+                displacement = tri.vector_to_coord((self.size + math.sqrt(self.energy_cap + target.energy_cap) + 5, random.randrange(360)))
                 new_pos = self.x + displacement[0], self.y + displacement[1]
-                newborn = Eukaryote(new_genome, (self.energy_cap + target.energy_cap) * 0.5, new_pos)
+                newborn = Eukaryote(new_genome, self.energy_cap, new_pos)
                 newborn.sexual_compatibility = self.sexual_compatibility
                 # newborn.energy_cap = self.energy_cap
                 # population.append(newborn)
@@ -262,8 +269,15 @@ class Eukaryote:
                         dx = other.x - newborn.x
                         dy = other.y - newborn.y
                         distance = math.sqrt(dx**2 + dy**2)
+                        # print("start reading")
+                        # print(distance)
+                        # print(newborn.size + other.size)
+                        # print(newborn.sexual_compatibility)
+                        # print(other.sexual_compatibility)
+                        # print(abs(newborn.sexual_compatibility - other.sexual_compatibility) <= 1.0)
                         if distance < newborn.size + other.size and abs(newborn.sexual_compatibility - other.sexual_compatibility) <= 1.0:
                             eligible = False
+                print(eligible)
                 if eligible and len(eukaryotes) < settings.max_population:
                     population.append(newborn)
                     # print(self.energy)
@@ -285,15 +299,15 @@ class Eukaryote:
 
 
 center = (scr.screen_size[0]*0.5, scr.screen_size[1]*0.5)
-e = 40
+e = 150
 producer_genome = [{"speed" : Gene((Speed(True), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(True), Photosynthetic(True))), "herbivore" : Gene((Herbivore(False), Herbivore(False)))}, {"energy cap" : Gene((EnergyCap(False), EnergyCap(False))), "offspring" : Gene((Offspring(True), Offspring(False)))}]
 rabbit_genome = [{"speed" : Gene((Speed(True), Speed(False)))}, {"photosynthetic" : Gene((Photosynthetic(False), Photosynthetic(False))), "herbivore" : Gene((Herbivore(True), Herbivore(True)))}, {"energy cap" : Gene((EnergyCap(True), EnergyCap(False))), "offspring" : Gene((Offspring(True), Offspring(False)))}]
 producer = Eukaryote(producer_genome, e, center)
 rabbit = Eukaryote(rabbit_genome, e, center)
 
-eukaryotes = [None] * 40
+eukaryotes = [None] * settings.starting_population
 for index in range(len(eukaryotes)):
-    if index > len(eukaryotes) * 0.1:
+    if index + 1 > len(eukaryotes) * settings.consumer_proportion:
         eukaryotes[index] = producer.new()
         # eukaryotes[index].offspring = 1
     else:
@@ -302,12 +316,14 @@ for index in range(len(eukaryotes)):
         # eukaryotes[index].energy_cap += 50
     rand_x = random.randint(0, scr.screen_size[0])
     rand_y = random.randint(0, scr.screen_size[1])
+    # rand_x = 150
+    # rand_y = 150
     eukaryotes[index].x = rand_x
     eukaryotes[index].y = rand_y
     eukaryotes[index].target_pos = rand_x, rand_y
-
+# eukaryotes[0]
 # eukaryotes = [rabbit.new(), rabbit.new()]
-# eukaryotes[1].x += 29
+# eukaryotes[1].x += 49
 
 # print(rabbit.meiosis())
 # class Eukaryote:

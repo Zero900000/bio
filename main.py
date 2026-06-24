@@ -8,20 +8,20 @@ import var
 import numpy as np
 from numba import njit, prange
 import settings
-
+timer = 0
 clock = pygame.time.Clock()
 stat_update_tick = 0
 stat_update_frequency = 10
 def class_to_numpy_detect(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
-        result[index] = [cls[index].x, cls[index].y, cls[index].size + cls[index].sensing_range]
+        result[index] = [cls[index].x, cls[index].y, cls[index].size, cls[index].sensing_range]
     return np.array(result)
 def class_to_numpy_interact(cls):
     result = [None] * len(cls)
     for index in range(len(cls)):
         org = cls[index]
-        result[index] = [org.x, org.y, org.size + org.interaction_range, org.energy > 1.5 * org.energy_cap * org.offspring, org.sexual_compatibility]
+        result[index] = [org.x, org.y, org.size, org.interaction_range, org.energy > 1.5 * org.energy_cap * org.offspring, org.sexual_compatibility]
     return np.array(result)
 @njit(parallel=True,fastmath=True)
 def detect_closest(cell_pos, targt_pos):
@@ -33,9 +33,11 @@ def detect_closest(cell_pos, targt_pos):
         cx = cell_pos[i, 0]
         cy = cell_pos[i, 1]
         closest_idx = -1
-        min_dist = cell_pos[i, 2]
-
+        base_min_dist = cell_pos[i, 2] + cell_pos[i, 3]
+        first = True
         for j in range(num_targets):
+            if first:
+                min_dist = base_min_dist + targt_pos[j, 2]
             if i != j:
                 tx = targt_pos[j][0]
                 ty = targt_pos[j][1]
@@ -43,9 +45,10 @@ def detect_closest(cell_pos, targt_pos):
                 dx = tx - cx
                 dy = ty - cy
                 distance = math.hypot(dx, dy)
-                if distance<min_dist:
-                    min_dist=distance
+                if distance < min_dist:
+                    min_dist = distance
                     closest_idx = j
+                    first = False
         closest_ind[i] = closest_idx
     # for index in range(num_cells):
     #     if closest_ind[index] == -1:
@@ -61,9 +64,11 @@ def detect_closest_inter(cell_pos, targt_pos):
         cx = cell_pos[i, 0]
         cy = cell_pos[i, 1]
         closest_idx = -1
-        min_dist = cell_pos[i, 2]
-
+        base_min_dist = cell_pos[i, 2]
+        first = True
         for j in range(num_targets):
+            if first:
+                min_dist = base_min_dist + targt_pos[j, 2]
             if i != j:
                 tx = targt_pos[j][0]
                 ty = targt_pos[j][1]
@@ -71,12 +76,14 @@ def detect_closest_inter(cell_pos, targt_pos):
                 dx = tx - cx
                 dy = ty - cy
                 distance = math.hypot(dx, dy)
-                if distance < cell_pos[i, 2] and cell_pos[i][3] and abs(cell_pos[i, 4] - targt_pos[j, 4]) <= 1.0:
+                if distance < base_min_dist + targt_pos[j, 2]:
+                    if cell_pos[i][4] and abs(cell_pos[i, 5] - targt_pos[j, 5]) <= 1.0:
+                        closest_idx = j
+                        break
+                if distance < min_dist:
+                    min_dist = distance
                     closest_idx = j
-                    break
-                if distance<min_dist:
-                    min_dist=distance
-                    closest_idx = j
+                    first = False
         closest_ind[i] = closest_idx
     # for index in range(num_cells):
     #     if closest_ind[index] == -1:
@@ -86,7 +93,12 @@ def detect_closest_inter(cell_pos, targt_pos):
 # print(calc_status_update())
 while var.game:
     clock.tick(10)
-
+    # timer += 1
+    # if timer >= 150:
+    #     print("result: ")
+    #     print(inp.calc_populations(euk.eukaryotes))
+    #     print(inp.allele_frequency_to_str(inp.calc_allele_frequency(euk.eukaryotes)))
+    #     break
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             var.game = False
@@ -95,8 +107,7 @@ while var.game:
                 var.paused = not var.paused
             inp.detect_commands(event)
                 # print("population: " + str(len(euk.eukaryotes)))
-    if var.paused:
-        continue
+
     if inp.automatic_updates:
         if stat_update_tick > stat_update_frequency:
             stat_update_tick = 0
@@ -104,6 +115,8 @@ while var.game:
             print(inp.calc_populations(euk.eukaryotes))
             print(inp.status_update())
         stat_update_tick += 1
+    if var.paused:
+        continue
     scr.screen.fill((255,255,255))
     death_index = 0
 

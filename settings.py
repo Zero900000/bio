@@ -1,4 +1,6 @@
-max_population = 2000
+starting_population = 30
+max_population = 500
+consumer_proportion = 0.5
 
 """
 USER MANUAL
@@ -6,17 +8,24 @@ SPACEBAR: pauses the simulation
 P: prints the current population size
 F: prints the current allele frequencies
 S: prints the current population size and allele frequencies (status update)
-A: toggles automatic updates on/off (automatic updates print the current population size and allele frequencies every 10 ticks) (controlled by stat_update_frequency in main.py)
-Prooceed to like 291 in euk.py and edit the  * 30 to whatever number you desire to increase or decrease the initial population size/population proportion
+A: toggles automatic updates on/off (automatic updates print the current population size and allele frequencies every second) (frequency of automatic updates can be changed through stat_update_frequency in main.py)
+
+all command outputs are visible in the console on the pycharm window
+
 Editing & Reading genomes: genomes are stored in the eukaryote class in euk.py, and can be edited by changing the values of the alleles in the genome dictionary. The genome is a dictionary of chromosomes, which are dictionaries of genes, which are dictionaries of alleles. Each allele has a dominant and recessive value, which can be edited to change the phenotype of the organism.
+
 Modifying Genetic Blueprints:
-To create custom phenotypic variations within your initial templates, supply custom parameters or vary the dominance states within the tuples:
+To create custom phenotypic variations within your initial templates, supply custom parameters or vary the dominance states in the parenthesis next to the allele name:
+    For alleles, True is dominant, and False is recessive ; eg: Speed(True) is a dominant speed allele, and Speed(False) is a recessive allele
+    Creating a Heterozygous Organism: Change a gene setup from homozygous dominant Gene((Speed(True), Speed(True))) to heterozygous Gene((Speed(True), Speed(False))).
 
-Creating a Heterozygous Organism: Change a gene setup from homozygous dominant Gene((Speed(True), Speed(True))) to heterozygous Gene((Speed(True), Speed(False))).
-
-Assigning Custom Non-Default Trait Values: To force a hyper-custom speed attribute independent of standard defaults, explicitly pass a float (decimal value) as the second argument:
+Assigning Custom Non-Default Trait Values: To force a custom speed attribute independent of standard defaults, explicitly pass a float (decimal value) as the second argument:
 {"Speed": Gene((Speed(True), Speed(False, 2.5)))}
 """
+
+
+#{1.0: 416, 4.0: 1102}
+
 
 #/population: 24/ /speed: 12 dom (25%), 36 rec (75%) || photosynthetic: 36 dom (75%), 12 rec (25%) || herbivore: 12 dom (25%), 36 rec (75%)/
 # /population: 27/ /speed: 12 dom (22%), 42 rec (78%) || photosynthetic: 42 dom (77%), 12 rec (23%) || herbivore: 12 dom (22%), 42 rec (78%)/
