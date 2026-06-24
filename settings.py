@@ -2,6 +2,7 @@ starting_population = 30
 max_population = 500
 consumer_proportion = 0.5
 
+
 """
 USER MANUAL
 SPACEBAR: pauses the simulation
